@@ -16,13 +16,16 @@ from linebot.v3.messaging import (
     QuickReply,
     QuickReplyItem,
     MessageAction,
+    PostbackAction,
 )
 from linebot.v3.webhooks import (
     MessageEvent,
     TextMessageContent,
-    FollowEvent
+    FollowEvent,
+    PostbackEvent,
 )
 import os
+import re
 
 app = Flask(__name__)
 
@@ -93,30 +96,97 @@ def callback():
 #             ))
         
  # 設定自動+快速回覆
+# @line_handler.add(MessageEvent, message=TextMessageContent)
+# def handle_quick_message(event):
+#     with ApiClient(configuration) as api_client:
+#         line_bot_api = MessagingApi(api_client)
+#         line_bot_api.reply_message_with_http_info(
+#             ReplyMessageRequest(
+#                 reply_token=event.reply_token,
+#                 messages=[TextMessage(text="$ 這是快速回覆 $", 
+#                                     emojis=[
+#                                         Emoji(index=0, product_id="670e0cce840a8236ddd4ee4c", emoji_id="115"),
+#                                         Emoji(index=9, product_id="670e0cce840a8236ddd4ee4c", emoji_id="117") ],
+#                                     quickReply=
+#                                     QuickReply(items=[
+#                                         QuickReplyItem(action=MessageAction(label="Say hello", text="Hello"))]
+#                                                         )
+#                                     )
+                                    
+#                         ]
+#             ))       
+
+# #設定PostbackAction
+# # label:按鈕上顯示的文字 data:按鈕被點擊時送出的資料 displayText:按鈕被點擊時顯示在聊天室的文字
+# # inputOption:另外的action(closeRichMenu:關閉圖文選單, openRichMenu:開啟圖文選單, openKeyboard:開啟鍵盤, openVoice:開啟語音輸入)
+# # fillInText:幫使用者在鍵盤輸入框填入文字(只有在openKeyboard時才有用)
+# @line_handler.add(MessageEvent, message=TextMessageContent)
+# def handle_quick_message(event):
+#     with ApiClient(configuration) as api_client:
+#         line_bot_api = MessagingApi(api_client)
+#         line_bot_api.reply_message_with_http_info(
+#             ReplyMessageRequest(
+#                 reply_token=event.reply_token,
+#                 messages=[TextMessage(text="請選擇動作", 
+#                                     quickReply=
+#                                     QuickReply(items=[
+#                                         QuickReplyItem(action=PostbackAction(label="新增就診資料", data="action=buy&itemid=123", displayText="請輸入就診資料", 
+#                                                                              inputOption="openKeyboard", 
+#                                                                              fillInText="---\nName: \nPhone: \nBirthday: \n---")
+#                                                                              ),
+#                                         QuickReplyItem(action=PostbackAction(label="查詢就診資料", data="action=buy&itemid=123", 
+#                                                                              displayText="Buy", inputOption="openKeyboard", 
+#                                                                              fillInText="---\nName: \nPhone: \nBirthday: \n---")
+#                                                                              )
+#                                                     ]
+#                                                         )
+#                                     )
+                                    
+#                         ]
+#             ))      
+
+# @line_handler.add(PostbackEvent)
+# def handle_postback(event):
+#     postback_data = event.source.data
+
 @line_handler.add(MessageEvent, message=TextMessageContent)
 def handle_quick_message(event):
+   
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
-        line_bot_api.reply_message_with_http_info(
-            ReplyMessageRequest(
-                reply_token=event.reply_token,
-                messages=[TextMessage(text="$ 這是快速回覆 $", 
-                                    emojis=[
-                                        Emoji(index=0, product_id="670e0cce840a8236ddd4ee4c", emoji_id="115"),
-                                        Emoji(index=9, product_id="670e0cce840a8236ddd4ee4c", emoji_id="117") ],
-                                    quickReply=
-                                    QuickReply(items=[
-                                        QuickReplyItem(action=MessageAction(label="Say hello", text="Hello"))]
-                                                        )
-                                    )
-                                    
-                        ]
-            ))       
+        event_message = event.message.text
+
+        #正規表達
+        pattern = r"寵物名稱:.*看診日期:.*體重:.*腎指數:.*血壓:.*"
+
+        if event_message == "新增看診紀錄":
+            line_bot_api.reply_message_with_http_info(
+                ReplyMessageRequest(
+                    reply_token=event.reply_token,
+                    messages=[TextMessage(text="請複製公版訊息進行下一步"),
+                            TextMessage(text="新增: \n寵物名稱: \n看診日期: \n體重: \n腎指數: \n血壓:",
+                                        )        
+                            ]))
+
+        elif  event_message == "查詢看診紀錄":
+            line_bot_api.reply_message_with_http_info(
+                ReplyMessageRequest(
+                    reply_token=event.reply_token,
+                    messages=[TextMessage(text="請選填想查詢的資料"),
+                            TextMessage(text="查詢: \n寵物名稱: \n看診日期: \n體重: \n腎指數: \n血壓:")     
+                            ]))
+                
+        elif re.search(pattern, event_message):
+            line_bot_api.reply_message_with_http_info(
+                ReplyMessageRequest(
+                    reply_token=event.reply_token,
+                    messages=[TextMessage(text="查詢中，請稍候...")]
+                ))
 
 # 處理followEvent
 @line_handler.add(FollowEvent)
 def handle_follow_test(event):
-    app.logger.info("only in terminal : Welcome to Calender")
+    app.logger.info("only in terminal : 歡迎使用看診小幫手")
 
 @line_handler.add(FollowEvent)
 def handle_follow(event):
@@ -126,10 +196,10 @@ def handle_follow(event):
                 ReplyMessageRequest(
                                     reply_token=event.reply_token,
                                     messages=[TextMessage(
-                                                text='$ Welcome to Calender $',
+                                                text='$ 歡迎使用看診小幫手 $',
                                                 emojis=[
                                                     Emoji(index=0, product_id="670e0cce840a8236ddd4ee4c", emoji_id="115"),
-                                                    Emoji(index=22, product_id="670e0cce840a8236ddd4ee4c", emoji_id="117") ]
+                                                    Emoji(index=12, product_id="670e0cce840a8236ddd4ee4c", emoji_id="117")],
                                                         )
                                             ]
                                     )
