@@ -26,7 +26,7 @@ import os
 
 app = Flask(__name__)
 
-# 初始化 Flask，用來創建 Web 伺服器並處理 HTTP 請求。
+# 設定帳號資訊
 configuration = Configuration(access_token=os.getenv('CHANNEL_ACCESS_TOKEN'))
 line_handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 
