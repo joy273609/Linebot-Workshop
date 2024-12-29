@@ -18,7 +18,7 @@ from linebot.v3.webhooks import (
     FileMessageContent
 )
 
-
+#app.logger.info()，代表只會出現在終端機
 @line_handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
     app.logger.info("Got text message")
