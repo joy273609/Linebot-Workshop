@@ -44,9 +44,9 @@ line_handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 #     )
 
 #設定主頁內容
-@app.route("/",methods=['GET'])
-def home():
-    return "success"
+# @app.route("/",methods=['GET'])
+# def home():
+#     return "success"
 
 #原始內容，讓line伺服器可以進行驗證及連結
 @app.route("/callback", methods=['POST'])
@@ -95,7 +95,7 @@ def callback():
 #                                         Emoji(index=11, product_id="670e0cce840a8236ddd4ee4c", emoji_id="117") ])]
 #             ))
         
- # 設定自動+快速回覆
+# 設定自動+快速回覆
 # @line_handler.add(MessageEvent, message=TextMessageContent)
 # def handle_quick_message(event):
 #     with ApiClient(configuration) as api_client:
